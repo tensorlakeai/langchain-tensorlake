@@ -7,7 +7,7 @@ This repository contains 1 package with Tensorlake integrations with LangChain:
 ## Installation
 
 ```
-pip install -U langchain-unstructured
+pip install -U langchain-tensorlake
 ```
 
 And you should configure credentials for Tensorlake by setting the following environment variables:
