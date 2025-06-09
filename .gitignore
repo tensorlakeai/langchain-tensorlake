@@ -4,4 +4,15 @@ __pycache__
 .ruff_cache
 .mypy_cache_test
 .env
-.venv*
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Python build artifacts
+*.egg-info/
+*.egg
+*.pyc
+__pycache__/
+build/
+dist/

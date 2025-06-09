@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langchain-tensorlake"
+version = "0.1.3"
+description = "A LangChain tool for parsing documents using Tensorlake's DocumentAI."
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+    "langchain",
+    "langgraph",
+    "langchain-openai",
+    "pydantic",
+    "python-dotenv",
+    "tensorlake",
+]
+
+[project.urls]
+Homepage = "https://github.com/tensorlakeai/langchain-tensorlake"
