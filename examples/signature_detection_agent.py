@@ -6,13 +6,11 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
-from tensorlake.documentai.parse import ChunkingStrategy, TableOutputMode
-
 from langchain_tensorlake import DocumentParserOptions, document_markdown_tool
 
 # Set API keys
-os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY_PLACEHOLDER"
-os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY_PLACEHOLDER"
+os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY"
+os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY"
 
 # Path to the document you want to analyze
 document_path = os.path.join(os.path.dirname(__file__), "nova_juno_agreement.pdf")
@@ -100,9 +98,6 @@ async def example_without_structured_schema():
     # set the parsing options
     parsing_options = DocumentParserOptions(
         detect_signature=True,
-        chunking_strategy=ChunkingStrategy.PAGE,
-        table_output_mode=TableOutputMode.MARKDOWN,
-        skip_ocr=True,
         timeout_seconds=300
     )
 
@@ -150,9 +145,6 @@ async def example_with_stuctured_schema():
         detect_signature=True,
         page_range="10",  # set the page range here, I am setting it to page 10 here
         extraction_schema=schema_json,
-        skip_ocr=True,
-        chunking_strategy=ChunkingStrategy.PAGE,
-        table_output_mode=TableOutputMode.MARKDOWN,
         timeout_seconds=300
     )
 
