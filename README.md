@@ -1,67 +1,53 @@
-# 🦜️🔗 LangChain {partner}
+# LangChain Tensorlake
 
-This repository contains 1 package with {partner} integrations with LangChain:
+This repository contains 1 package with Tensorlake integrations with LangChain:
 
-- [langchain-{package_lower}](https://pypi.org/project/langchain-{package_lower}/)
+- [langchain-tensorlake](https://pypi.org/project/langchain-tensorlake/)
 
-## Initial Repo Checklist (Remove this section after completing)
+## Creating a TestPyPI version
+This repository has a `TEST_PYPI_TOKEN` for publishing to [test.pypi.org](https://https://test.pypi.org/project/langchain-tensorlake/).
 
-Welcome to the LangChain Partner Integration Repository! This checklist will help you get started with your new repository.
+### Through the GitHub Workflow
+To trigger a build and automatic publish to [test.pypi.org/project/langchain-tensorlake](https://test.pypi.org/project/langchain-tensorlake/), follow these steps:
+1. Create a new git tag with `git tag v0.1.0`, updating the version number appropriately
+2. Push the tag to GitHub with `git push origin v0.1.0`
 
-After creating your repo from the integration-repo-template, we'll go through the following steps:
+### Manually
+To manually build and publish to [test.pypi.org/project/langchain-tensorlake](https://test.pypi.org/project/langchain-tensorlake/), follow these steps:
+1. Bump the version in [pyproject.toml](pyproject.toml).
+2. Build with `python -m build`
+3. Run `twine upload --repository testpypi dist/*`
+4. Verify it was updated on [TestPyPI](https://test.pypi.org/project/langchain-tensorlake/)
+5. Verify the installation with:  
+    ```
+    pip install --index-url https://test.pypi.org/simple \
+                --extra-index-url https://pypi.org/simple \
+                langchain-tensorlake
+    ```
 
-1. Setting up your new repository in GitHub
-2. 
+## Creating a PyPI verison
+This repository has a `PYPI_API_TOKEN` for publishing to [pypi.org](https://https://pypi.org/project/langchain-tensorlake/).
 
-This setup assumes that the partner package is already split. For those instructions,
-see [these docs](https://python.langchain.com/docs/contributing/integrations#partner-packages).
+### Through the GitHub Workflow
+To trigger a build and automatic publish to [pypi.org/project/langchain-tensorlake](https://pypi.org/project/langchain-tensorlake/), follow these steps:
+1. On GitHub, go to [Releases -> Create a new release](https://github.com/tensorlakeai/langchain-tensorlake/releases) 
+2. Add a tag version, release title, and release description
+3. Click Publish release
 
-Code (auto ecli)
+### Manually
+To manually build and publish to [pypi.org/project/langchain-tensorlake](https://pypi.org/project/langchain-tensorlake/), follow these steps:
+1. Bump the version in [pyproject.toml](pyproject.toml).
+2. Build with `python -m build`
+3. Run `twine upload dist/*`
+4. Verify it was updated on [PyPI](https://pypi.org/project/langchain-tensorlake/)
+5. Verify the installation with:  
+    ```
+    pip install langchain-tensorlake
+    ```
 
-- [ ] Fill out the readme above (for folks that follow pypi link)
-- [ ] Copy package into /libs folder
-- [ ] Update `"Source Code"` and `repository` under `[project.urls]` in /libs/*/pyproject.toml
+### Clean Up After a Build
 
-Workflow code (auto ecli)
-
-- [ ] Populate .github/workflows/_release.yml with `on.workflow_dispatch.inputs.working-directory.default`
-- [ ] Configure `LIB_DIRS` in .github/scripts/check_diff.py
-
-Workflow code (manual)
-
-- [ ] Add secrets as env vars in .github/workflows/_release.yml
-
-Monorepo workflow code (manual)
-
-- [ ] Pull in new code location, remove old in .github/workflows/api_doc_build.yml
-
-In github (manual)
-
-- [ ] Add integration testing secrets in Github (ask Chester for help)
-- [ ] Add partner collaborators in Github (ask Chester for help)
-- [ ] "Allow auto-merge" in General Settings 
-- [ ] Only "Allow squash merging" in General Settings
-- [ ] Set up ruleset matching CI build (ask Chester for help)
-    - name: ci build
-    - enforcement: active
-    - bypass: write
-    - target: default branch
-    - rules: restrict deletions, require status checks ("CI Success"), block force pushes
-- [ ] Set up ruleset
-    - name: require prs
-    - enforcement: active
-    - bypass: none
-    - target: default branch
-    - rules: restrict deletions, require a pull request before merging (0 approvals, no boxes), block force pushes
-
-Pypi (manual)
-
-- [ ] Add new repo to test-pypi and pypi trusted publishing (ask Chester for help)
-
-Slack
-
-- [ ] Set up release alerting in Slack (ask Chester for help)
-
-release:
-/github subscribe langchain-ai/langchain-{partner_lower} releases workflows:{name:"release"}
-/github unsubscribe langchain-ai/langchain-{partner_lower} issues pulls commits deployments
+While testing, you may need to clean your environment. Make sure you remove all dist, build, and egg-info files:
+```
+rm -rf dist/ build/ src/langchain_tensorlake.egg-info
+``` 

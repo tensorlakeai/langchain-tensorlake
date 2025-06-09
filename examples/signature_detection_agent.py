@@ -8,12 +8,14 @@ from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
 from tensorlake.documentai.parse import ChunkingStrategy, TableOutputMode
 
-from ..src.tensorlake_tool import DocumentParserOptions, document_markdown_tool
+from langchain_tensorlake import DocumentParserOptions, document_markdown_tool
 
 # Set API keys
-os.environ["TENSORLAKE_API_KEY"] = "your_tensorlake_api_key_here"
-os.environ["OPENAI_API_KEY"] = "your_openai_api_key_here"
+os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY_PLACEHOLDER"
+os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY_PLACEHOLDER"
 
+# Path to the document you want to analyze
+document_path = os.path.join(os.path.dirname(__file__), "nova_juno_agreement.pdf")
 
 # Define the agent state
 class AgentState(TypedDict):
@@ -95,8 +97,6 @@ async def analyze_signatures_agents(
 
 
 async def example_without_structured_schema():
-    # change to your own document path
-    document_path = "path/to/your/document.pdf"
     # set the parsing options
     parsing_options = DocumentParserOptions(
         detect_signature=True,
@@ -122,8 +122,6 @@ async def example_without_structured_schema():
 
 
 async def example_with_stuctured_schema():
-    # change to your own document path
-    document_path = "path/to/your/document.pdf"
     # the structured schema that you want to set
     schema_json = """{
             "properties": {
