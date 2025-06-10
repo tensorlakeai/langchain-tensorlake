@@ -2,8 +2,9 @@ import time
 import os
 from dotenv import load_dotenv
 from typing import Optional, Type, Union
+import asyncio
 from langchain_core.tools import StructuredTool
-from pydantic import Field, BaseModel, Json
+from pydantic import Field, BaseModel
 
 from tensorlake.documentai import DocumentAI, ParsingOptions
 from tensorlake.documentai.parse import (
@@ -21,104 +22,173 @@ TENSORLAKE_API_KEY = os.getenv("TENSORLAKE_API_KEY")
 
 
 class DocumentParserOptions(BaseModel):
-    """Comprehensive options for parsing a document with Tensorlake."""
+    """
+    Comprehensive options for parsing documents with Tensorlake AI.
+    Choose parameters based on the user's question and document analysis needs.
+    """
 
     # Chunking options
     chunking_strategy: Optional[ChunkingStrategy] = Field(
         default=ChunkingStrategy.PAGE,
-        description="Strategy for chunking the document (NONE, PAGE, or SECTION_HEADER)"
+        description="""Strategy for breaking down the document:
+        - NONE: Keep document as one piece (good for short docs or when you need full context)
+        - PAGE: Split by pages (default, good for most documents)
+        - SECTION_HEADER: Split by headers (good for structured documents like reports)"""
     )
 
     # Table parsing options
     table_parsing_strategy: TableParsingStrategy = Field(
         default=TableParsingStrategy.VLM,
-        description="Algorithm for parsing tables (TSR for structured tables, VLM for complex/unstructured tables)"
+        description="""Algorithm for parsing tables:
+        - TSR: Use for clean, well-formatted tables with clear borders
+        - VLM: Use for complex tables, handwritten tables, or tables in images (more accurate but slower)
+        Choose VLM for financial reports, forms, or complex layouts."""
     )
+
     table_output_mode: TableOutputMode = Field(
         default=TableOutputMode.MARKDOWN,
-        description="Format for table output (JSON, MARKDOWN, or HTML)"
+        description="""Format for table output:
+        - JSON: For structured data extraction and analysis
+        - MARKDOWN: For readable text format (good for summaries)
+        - HTML: For preserving complex formatting"""
     )
+
     table_parsing_prompt: Optional[str] = Field(
         default=None,
-        description="Custom prompt to guide table parsing"
+        description="""Custom prompt to guide table parsing. Examples:
+        - "Focus on financial data and numbers"
+        - "Extract all form fields and their values"
+        - "Parse this as a data table with headers" 
+        Use when you need specific focus on certain table elements."""
     )
+
     table_summary: bool = Field(
         default=False,
-        description="Whether to generate summaries of tables"
+        description="""Generate summaries of tables. Set to True when:
+        - User asks for table analysis or insights
+        - Document has many tables that need summarization
+        - User wants to understand table contents without raw data"""
     )
 
     # Figure and image options
     figure_summary: bool = Field(
         default=False,
-        description="Whether to generate summaries of figures and images"
+        description="""Generate summaries of figures, charts, and images. Set to True when:
+        - User asks about charts, graphs, or visual elements
+        - Document contains important diagrams or infographics
+        - User needs to understand visual data representations"""
     )
+
     figure_summarization_prompt: Optional[str] = Field(
         default=None,
-        description="Custom prompt for figure summarization"
+        description="""Custom prompt for figure analysis. Examples:
+        - "Describe the trends shown in these charts"
+        - "Extract data points from graphs"
+        - "Identify key visual elements and their meaning"
+        Use for specific figure analysis requirements."""
     )
 
     # Page and layout options
     page_range: Optional[str] = Field(
         default=None,
-        description="Specific page range to parse (e.g., '1-5' or '1,3,5')"
+        description="""Specific pages to parse (e.g., '1-5', '1,3,5', '10-end').
+        Use when user asks about specific sections or pages of the document."""
     )
+
     skew_correction: bool = Field(
         default=False,
-        description="Whether to apply skew correction to scanned documents"
+        description="""Apply skew correction to scanned documents.
+        Set to True for poorly scanned documents or photos of documents."""
     )
+
     disable_layout_detection: bool = Field(
         default=False,
-        description="Whether to disable automatic layout detection"
+        description="""Disable automatic layout detection.
+        Set to True only if layout detection is causing issues with document structure."""
     )
 
     # Signature and form detection
     detect_signature: bool = Field(
         default=False,
-        description="Whether to detect the presence of signatures in the document"
+        description="""Detect signatures in the document. Set to True when:
+        - User asks about signatures, signing, or authentication
+        - Document is a contract, agreement, or legal document
+        - User needs to verify document execution"""
     )
+
     form_detection_mode: FormDetectionMode = Field(
         default=FormDetectionMode.OBJECT_DETECTION,
-        description="Algorithm for form detection (VLM or OBJECT_DETECTION)"
+        description="""Algorithm for form detection:
+        - OBJECT_DETECTION: Fast, good for standard forms
+        - VLM: More accurate for complex or handwritten forms
+        Use VLM for handwritten forms or complex layouts."""
     )
 
     # Structured extraction options
-    extraction_schema: Optional[Union[Type[BaseModel], Json]] = Field(
+    extraction_schema: Optional[Union[Type[BaseModel], dict, str]] = Field(
         default=None,
-        description="JSON schema for structured data extraction"
+        description="""JSON schema for structured data extraction. Use when:
+        - User wants specific data fields extracted
+        - Need to convert unstructured document to structured data
+        - Building data pipelines or databases from documents
+        Example: {"name": "string", "date": "date", "amount": "number"}"""
     )
+
     extraction_prompt: Optional[str] = Field(
         default=None,
-        description="Custom prompt for structured data extraction"
+        description="""Custom prompt for structured extraction. Examples:
+        - "Extract all personal information and contact details"
+        - "Find all financial transactions and amounts"
+        - "Get all dates, names, and locations mentioned"
+        Use to guide what specific information to extract."""
     )
+
     extraction_model_provider: ModelProvider = Field(
         default=ModelProvider.TENSORLAKE,
-        description="Model provider for extraction (TENSORLAKE, SONNET, or GPT4OMINI)"
+        description="""Model for extraction:
+        - TENSORLAKE: Fast, cost-effective (default)
+        - SONNET: High accuracy for complex extraction
+        - GPT4OMINI: Good balance of speed and accuracy"""
     )
+
     skip_ocr: bool = Field(
         default=False,
-        description="Whether to skip OCR processing for text-based PDFs"
+        description="""Skip OCR for text-based PDFs.
+        Set to True for digital PDFs to speed up processing and preserve text quality."""
     )
 
-    # Webhook options
-    deliver_webhook: bool = Field(
-        default=False,
-        description="Whether to deliver results via webhook when processing is complete"
-    )
-
-    # Processing timeout
     timeout_seconds: int = Field(
         default=300,
-        description="Maximum time to wait for processing completion (in seconds)"
+        description="Maximum processing time in seconds (increase for large documents)."
     )
 
 
-def document_to_markdown_converter(path: str, options: DocumentParserOptions) -> str:
+def document_to_markdown_converter(
+        path: str,
+        chunking_strategy: Optional[ChunkingStrategy] = ChunkingStrategy.PAGE,
+        table_parsing_strategy: TableParsingStrategy = TableParsingStrategy.VLM,
+        table_output_mode: TableOutputMode = TableOutputMode.MARKDOWN,
+        table_parsing_prompt: Optional[str] = None,
+        table_summary: bool = False,
+        figure_summary: bool = False,
+        figure_summarization_prompt: Optional[str] = None,
+        page_range: Optional[str] = None,
+        skew_correction: bool = False,
+        disable_layout_detection: bool = False,
+        detect_signature: bool = False,
+        form_detection_mode: FormDetectionMode = FormDetectionMode.OBJECT_DETECTION,
+        extraction_schema: Optional[Union[Type[BaseModel], dict, str]] = None,
+        extraction_prompt: Optional[str] = None,
+        extraction_model_provider: ModelProvider = ModelProvider.TENSORLAKE,
+        skip_ocr: bool = False,
+        timeout_seconds: int = 300
+) -> str:
     """
     Convert a document to markdown using Tensorlake's DocumentAI.
 
     Args:
         path: Path to the document file to parse (supports PDF, DOCX, images, etc.)
-        options: DocumentParserOptions object containing all parsing configuration
+        All parameters are individual fields that the agent can set based on the question.
 
     Returns:
         str: The parsed document in markdown format, or error message if failed
@@ -139,37 +209,37 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
 
         # Configure parsing options based on user input
         parsing_options = ParsingOptions(
-            chunking_strategy=options.chunking_strategy,
-            table_parsing_strategy=options.table_parsing_strategy,
-            table_output_mode=options.table_output_mode,
-            table_parsing_prompt=options.table_parsing_prompt,
-            table_summary=options.table_summary,
-            figure_summary=options.figure_summary,
-            figure_summarization_prompt=options.figure_summarization_prompt,
-            page_range=options.page_range,
-            skew_correction=options.skew_correction,
-            disable_layout_detection=options.disable_layout_detection,
-            detect_signature=options.detect_signature,
-            form_detection_mode=options.form_detection_mode,
-            deliver_webhook=options.deliver_webhook
+            chunking_strategy=chunking_strategy,
+            table_parsing_strategy=table_parsing_strategy,
+            table_output_mode=table_output_mode,
+            table_parsing_prompt=table_parsing_prompt,
+            table_summary=table_summary,
+            figure_summary=figure_summary,
+            figure_summarization_prompt=figure_summarization_prompt,
+            page_range=page_range,
+            skew_correction=skew_correction,
+            disable_layout_detection=disable_layout_detection,
+            detect_signature=detect_signature,
+            form_detection_mode=form_detection_mode,
+            deliver_webhook=deliver_webhook
         )
 
         # Add extraction options if schema is provided
-        schema = options.extraction_schema
+        schema = extraction_schema
         if isinstance(schema, dict):
             import json
             schema = json.dumps(schema)
         if schema:
             parsing_options.extraction_options = ExtractionOptions(
                 schema=schema,
-                prompt=options.extraction_prompt,
-                provider=options.extraction_model_provider,
-                skip_ocr=options.skip_ocr
+                prompt=extraction_prompt,
+                provider=extraction_model_provider,
+                skip_ocr=skip_ocr
             )
-        elif options.skip_ocr:
+        elif skip_ocr:
             parsing_options.extraction_options = ExtractionOptions(
-                provider=options.extraction_model_provider,
-                skip_ocr=options.skip_ocr
+                provider=extraction_model_provider,
+                skip_ocr=skip_ocr
             )
 
         # Start parsing job
@@ -177,7 +247,7 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
 
         # Poll for completion with configurable timeout
         start_time = time.time()
-        max_wait_time = options.timeout_seconds
+        max_wait_time = timeout_seconds
 
         while time.time() - start_time < max_wait_time:
             result = doc_ai.get_job(job_id)
@@ -202,10 +272,9 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
         return f"Error processing document: {str(e)}"
 
 
-async def document_to_markdown_converter_async(path: str, options: DocumentParserOptions) -> str:
+async def document_to_markdown_converter_async(path: str, **kwargs) -> str:
     """Asynchronous version of document to markdown converter."""
-    import asyncio
-    return await asyncio.to_thread(document_to_markdown_converter, path, options)
+    return await asyncio.to_thread(document_to_markdown_converter, path, **kwargs)
 
 
 # Create the Document to Markdown tool using StructuredTool
@@ -213,7 +282,27 @@ document_markdown_tool = StructuredTool.from_function(
     func=document_to_markdown_converter,
     coroutine=document_to_markdown_converter_async,
     name="DocumentToMarkdownConverter",
-    description="Convert documents (PDF, DOCX, images, etc.) to markdown using Tensorlake AI. Supports tables, figures, signatures, and structured extraction.",
+    description="""Advanced document parser that converts documents to markdown with AI-powered analysis.
+
+**CAPABILITIES:**
+- Parse PDFs, DOCX, images, and other document formats
+- Extract and analyze tables with different strategies (TSR for clean tables, VLM for complex ones)
+- Summarize figures, charts, and visual elements
+- Detect signatures and form fields
+- Extract structured data using custom schemas
+- Handle scanned documents with OCR and skew correction
+
+**WHEN TO USE DIFFERENT PARAMETERS:**
+- Questions about "signatures" or "signed documents" → set detect_signature=True
+- Questions about "tables", "data", or "financial information" → use table parsing with summaries
+- Questions about "charts", "graphs", or "visual elements" → set figure_summary=True
+- Questions about "forms" or "form fields" → use form detection
+- Questions asking for "structured data" or "specific fields" → use extraction_schema
+- Questions about "specific pages" → set page_range
+- Scanned or poor quality documents → set skew_correction=True
+
+Choose parameters intelligently based on what the user is asking about.""",
+    args_schema=DocumentParserOptions,
     return_direct=False,
     handle_tool_error="Document parsing failed. Please verify the file path and your Tensorlake API key."
 )
