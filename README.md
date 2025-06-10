@@ -11,7 +11,7 @@ This repository contains 1 package with Tensorlake integrations with LangChain:
 ## Installation
 
 ```bash
-pip install langchain-tensorlake
+pip install -U langchain-tensorlake
 ```
 
 ---
