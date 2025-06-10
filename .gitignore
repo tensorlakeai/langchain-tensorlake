@@ -8,6 +8,7 @@ venv/
 .venv/
 **/venv/
 **/.venv/
+**/local_tests/** 
 
 # Python build artifacts
 *.egg-info/
