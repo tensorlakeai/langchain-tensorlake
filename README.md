@@ -2,10 +2,6 @@
 
 `langchain-tensorlake` provides seamless integration between [Tensorlake](https://tensorlake.ai) and [LangChain](https://langchain.com), enabling you to build sophisticated document processing agents with structured extraction workflows.
 
-This repository contains 1 package with Tensorlake integrations with LangChain:
-
-- [langchain-tensorlake](https://pypi.org/project/langchain-tensorlake/)
-
 ---
 
 ## Installation

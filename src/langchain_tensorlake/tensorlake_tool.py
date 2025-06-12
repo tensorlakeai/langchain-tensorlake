@@ -164,7 +164,8 @@ def document_to_markdown_converter(
     Convert a document to markdown using Tensorlake's DocumentAI.
 
     Args:
-        path: Path to the document file to parse (supports PDF, DOCX, images, etc.)
+        path: Path to the document file to parse (supports PDF, DOCX, images, etc.) or HTTP, HTTPS URL
+        options: DocumentParserOptions object containing all parsing configuration
 
     Returns:
         str: The parsed document in markdown format, or error message if failed
@@ -181,7 +182,10 @@ def document_to_markdown_converter(
         doc_ai = DocumentAI(api_key=TENSORLAKE_API_KEY)
 
         # Upload document to TensorLake
-        file_id = doc_ai.upload(path=path)
+        if path.startswith("http") or path.startswith("https"):
+            file_id = path
+        else:
+            file_id = doc_ai.upload(path=path)
 
         # Configure parsing options based on user input
         parsing_options = ParsingOptions(
