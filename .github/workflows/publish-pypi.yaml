@@ -24,13 +24,38 @@ jobs:
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install build twine toml
+      - name: Check if version bumped
+        id: version_check
+        run: |
+          git fetch origin main --depth=2
+          PREV_COMMIT=$(git rev-parse HEAD^)
+          CURR_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          PREV_VERSION=$(git show $PREV_COMMIT:pyproject.toml | python -c "import sys, toml; print(toml.load(sys.stdin)['project']['version'])")
+          echo "Current version: $CURR_VERSION"
+          echo "Previous version: $PREV_VERSION"
+          if [ "$CURR_VERSION" = "$PREV_VERSION" ]; then
+            echo "No version bump detected."
+            echo "bumped=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version bump detected."
+            echo "bumped=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build package
+        if: steps.version_check.outputs.bumped == 'true'
         run: python -m build
 
       - name: Publish to PyPI
+        if: steps.version_check.outputs.bumped == 'true'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: twine upload dist/*
+
+      - name: Publish to TestPyPI
+        if: steps.version_check.outputs.bumped == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: twine upload --repository-url https://test.pypi.org/legacy/ dist/*
