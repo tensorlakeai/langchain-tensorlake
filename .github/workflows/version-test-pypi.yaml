@@ -1,0 +1,51 @@
+# .github/workflows/check-version.yml
+name: Check Package Version on PR to Main
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Get new version from PR branch
+        id: new
+        run: |
+          version=$(grep -E '^version\s*=\s*' pyproject.toml | sed -E 's/version\s*=\s*"(.*)"/\1/')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Fetch base (main) branch file
+        run: |
+          git fetch origin main:main
+          git show main:pyproject.toml > main_pyproject.toml
+
+      - name: Get current version from main
+        id: current
+        run: |
+          version=$(grep -E '^version\s*=\s*' main_pyproject.toml | sed -E 's/version\s*=\s*"(.*)"/\1/')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Compare versions and comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ${{ steps.current.outputs.version }} -> ${{ steps.new.outputs.version }}
+
+            ${{
+              (steps.new.outputs.version > steps.current.outputs.version)
+              && '✅ Version bump detected. If you're an admin and you are ready to publish to Test PyPI, comment:
+
+`/deploy-testpypi`'
+              || '⚠️ Version has not increased. Please bump the version if you want to deploy to Test PyPI.'
+            }}
