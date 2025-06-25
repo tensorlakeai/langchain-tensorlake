@@ -1,0 +1,127 @@
+# Tensorlake
+
+[Tensorlake](https://www.tensorlake.ai/) is a robust document ingestion engine that transforms complex documents—like scanned PDFs, DOCX files, and images—into structured, indexable data. Ideal for use cases such as RAG pipelines, contract analysis, signature detection, checkboxes identification and table extraction, it enables seamless document understanding for AI agents and search systems.
+At its core, Tensorlake's DocumentAI leverages visual language models (VLMs), OCR, and intelligent layout understanding to produce rich, structured output.
+
+> This guide covers how to use Tensorlake inside LangChain with the `langchain-tensorlake` integration.
+
+You can start with 100 free credits by signing up at [Tensorlake Cloud](cloud.tensorlake.ai)
+
+## Installation and setup
+
+Install the Python package:
+
+```bash
+pip install langchain-tensorlake
+```
+
+You will also need an API key from Tensorlake. Set it as an environment variable:
+
+```bash
+export TENSORLAKE_API_KEY="your-api-key-here"
+```
+Get your key from [Tensorlake Cloud](cloud.tensorlake.ai).
+
+
+## Tool: `document_markdown_tool`
+
+The `document_markdown_tool` transforms a document into markdown or structured output using Tensorlake's DocumentAI engine.
+
+```python
+from langchain_tensorlake import document_markdown_tool
+```
+
+Use this tool within LangChain and LangGraph workflows to preprocess or enrich documents for agents, or retrieval.
+
+## Input Schema: `DocumentParserOptions`
+
+The tool uses a pydantic model for rich parsing configuration:
+
+### Chunking Options
+- `chunking_strategy`: `NONE`, `PAGE`, or `SECTION_HEADER`
+
+### Table Options
+- `table_parsing_strategy`: `TSR` or `VLM`
+- `table_output_mode`: `JSON`, `MARKDOWN`, or `HTML`
+- `table_summary`: Whether to summarize tables
+
+### Figure Options
+- `figure_summary`: Enable summarization
+- `figure_summarization_prompt`: Optional custom prompt
+
+### Layout and Page Options
+- `page_range`: Parse specific pages (e.g. `1-3,5`)
+- `skew_correction`: Apply to scanned documents
+- `disable_layout_detection`: If True, disables visual layout analysis
+
+### Signature and Form Options
+- `detect_signature`: Detect signature presence
+- `form_detection_mode`: `OBJECT_DETECTION` or `VLM`
+
+### Extraction Options
+- `extraction_schema`: JSON schema or pydantic model
+- `extraction_prompt`: Optional custom prompt
+- `extraction_model_provider`: `TENSORLAKE`, `GPT4OMINI`, `SONNET`
+- `skip_ocr`: If True, skips OCR for PDFs
+
+### Timeout / Webhook
+- `timeout_seconds`: Max polling duration
+- `deliver_webhook`: Whether to send results via webhook
+
+## Example Usage
+
+### 1. Simple Parsing
+
+```python
+from langchain_tensorlake import document_markdown_tool, DocumentParserOptions
+
+options = DocumentParserOptions(
+    detect_signature=True
+)
+
+response = document_markdown_tool.invoke({
+    "path": "path/to/your/document.pdf",
+    "options": options
+})
+```
+
+### 2. Parsing with Structured Output
+
+```python
+from langchain_tensorlake import document_markdown_tool, DocumentParserOptions
+
+options = DocumentParserOptions(
+    extraction_schema={
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "date": {"type": "string"}
+        },
+        "required": ["name", "date"]
+    }
+)
+
+response = document_markdown_tool.invoke({
+    "path": "path/to/your/document.pdf",
+    "options": options
+})
+```
+
+## Supported File Types
+- PDF
+- DOCX
+- Images (PNG, JPG, TIFF, etc.)
+- URLs to online documents or hosted files.
+
+## Notes
+- Asynchronous parsing and webhook delivery are supported.
+- Output includes markdown, structured fields, html, etc.
+
+
+## References
+- GitHub: [tensorlake](https://github.com/tensorlakeai/tensorlake)
+- Tensorlake API Docs: [https://docs.tensorlake.ai](https://docs.tensorlake.ai)
+
+---
+
+
