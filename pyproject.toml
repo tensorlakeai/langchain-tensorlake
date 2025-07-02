@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "langchain-tensorlake"
-version = "0.1.5"
+version = "0.1.6"
 description = "A LangChain tool for parsing documents using Tensorlake's DocumentAI."
 readme = "README.md"
 license = {text = "MIT"}
