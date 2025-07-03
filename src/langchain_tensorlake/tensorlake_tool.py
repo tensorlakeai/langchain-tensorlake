@@ -163,22 +163,19 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
             if debug: print('Current result:', result)
             if debug: print("result['status']:", result['status'])
 
-            if result['status'] in [ParseStatus.PENDING, ParseStatus.PROCESSING]:
+            if result.status in [ParseStatus.PENDING, ParseStatus.PROCESSING]:
                 time.sleep(5)  # Wait 5 seconds before checking again
-            elif result['status'] == ParseStatus.SUCCESSFUL:
-                # Return the parsed content
-                if 'content' in result and result['content']:
-                    if debug: print("returning result.content")
-                    return result['content']
-                elif 'markdown' in result and result['markdown']:
+            elif result.status == ParseStatus.SUCCESSFUL:
+                # Return the parsed document
+                if 'chunks' in result and result.chunks:
                     if debug: print("returning result.markdown")
-                    return result['markdown']
+                    return result.chunks
                 else:
                     if debug: print("returning result as string")
                     return str(result)  # Fallback to string representation
             else:
-                if debug: print("Returning because document parsing failed with status:", result['status'])
-                return f"Document parsing failed with status: {result['status']}"
+                if debug: print("Returning because document parsing failed with status:", result.status)
+                return f"Document parsing failed with status: {result.status}"
 
         # Timeout reached
         if debug: print("Returning timeout message")
