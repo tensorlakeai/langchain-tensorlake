@@ -161,7 +161,7 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
         while time.time() - start_time < max_wait_time:
             result = doc_ai.get_parse(parse_id)
             if debug: print('Current result:', result)
-            if debug: print("result['status']:", result['status'])
+            if debug: print("result.status:", result.status)
 
             if result.status in [ParseStatus.PENDING, ParseStatus.PROCESSING]:
                 time.sleep(5)  # Wait 5 seconds before checking again
