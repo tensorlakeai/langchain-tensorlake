@@ -1,11 +1,13 @@
 import asyncio
 import os
-from typing import Annotated, TypedDict, Union, List
+from typing import Annotated, List, TypedDict, Union
+
 from langchain_core.messages import HumanMessage
-from langgraph.graph import StateGraph, END
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from langchain_openai import ChatOpenAI
+
 from langchain_tensorlake import DocumentParserOptions, document_markdown_tool
 
 # Set API keys
@@ -162,5 +164,7 @@ async def example_with_stuctured_schema():
 if __name__ == "__main__":
     # example 1
     asyncio.run(example_without_structured_schema())
+    # example 2
+    asyncio.run(example_with_stuctured_schema())
     # example 2
     asyncio.run(example_with_stuctured_schema())
