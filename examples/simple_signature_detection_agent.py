@@ -1,8 +1,10 @@
 # 1. Import the langchain-tensorlake tool
-from langchain_tensorlake import DocumentParserOptions, document_markdown_tool
-from langgraph.prebuilt import create_react_agent
 import asyncio
 import os
+
+from langgraph.prebuilt import create_react_agent
+
+from langchain_tensorlake import document_markdown_tool
 
 # 2. Load the environment variables 
 os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY_PLACEHOLDER"
