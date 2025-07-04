@@ -11,10 +11,10 @@ os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY_PLACEHOLDER"
 os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY_PLACEHOLDER"
 
 # 3. Define the path to the document to be parsed
-path = "path/to/your/document.pdf"
+document_path = os.path.join(os.path.dirname(__file__), "nova_juno_agreement.pdf")
 
 # 4. Define the question to be asked and create the agent
-question = f"What contextual information can you extract about the signatures in my document found at {path}?"
+question = f"What contextual information can you extract about the signatures in my document found at {document_path}?"
 
 async def main():
     # 5. Create the agent with the Tensorlake tool
