@@ -6,7 +6,11 @@ from dotenv import load_dotenv
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 from tensorlake.documentai import DocumentAI
-from tensorlake.documentai.models import EnrichmentOptions, ParsingOptions
+from tensorlake.documentai.models import (
+    EnrichmentOptions, 
+    ParsingOptions,
+    ParseStatus
+)
 from tensorlake.documentai.models.enums import (
     ChunkingStrategy,
     ParseStatus,
@@ -155,7 +159,7 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
         max_wait_time = options.timeout_seconds
 
         while time.time() - start_time < max_wait_time:
-            result = doc_ai.get_parse(parse_id)
+            result = doc_ai.get_parsed_result(parse_id)
             if debug: print('Current result:', result)
             if debug: print("result.status:", result.status)
 
