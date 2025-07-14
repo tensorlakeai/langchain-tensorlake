@@ -1,0 +1,122 @@
+# Tensorlake
+
+[Tensorlake](https://www.tensorlake.ai/) is a robust document ingestion engine that transforms complex documents—like scanned PDFs, DOCX files, raw text, presentations, spreadsheets, and even images—into structured, indexable data. Ideal for use cases such as RAG pipelines, knowledge graph generation, contract analysis, signature detection, checkboxes identification, and table extraction, it enables seamless document understanding for AI agents and search systems.
+At its core, Tensorlake's DocumentAI leverages visual language models (VLMs), OCR, and intelligent layout understanding to produce rich, structured output.
+
+> This guide covers how to use Tensorlake inside LangChain with the `langchain-tensorlake` integration.
+
+You can start with 100 free credits by signing up at [Tensorlake Cloud](cloud.tensorlake.ai)
+
+## Installation and setup
+
+Install the Python package:
+
+```bash
+pip install langchain-tensorlake
+```
+
+You will also need an API key from Tensorlake. Set it as an environment variable:
+
+```bash
+export TENSORLAKE_API_KEY="your-api-key-here"
+```
+Get your key from [Tensorlake Cloud](https://cloud.tensorlake.ai).
+
+
+## Tool: `document_markdown_tool`
+
+The `document_markdown_tool` transforms a document into markdown and structured output using Tensorlake's DocumentAI engine.
+
+```python
+from langchain_tensorlake import document_markdown_tool
+```
+
+Use this tool within LangChain and LangGraph workflows to preprocess or enrich documents for agents, or retrieval.
+
+## Tensorlake Tool Configuration Options
+
+Tensorlake parsing is configurable across a number of different options, and when using the `document_markdown_tool` and a robust model, such as OpenAI, with your LangGraph agent, the agent will configure the Tensorlake tool for you. 
+
+Here are some of the configurations Tensorlake offers so that you can define a strong prompt for your LangGraph agent to enable a more accurate configuration selection:
+
+### Chunking Options
+- `chunking_strategy`: `NONE`, `PAGE`, `SECTION`, or `FRAGMENT`
+
+### Table Processing Options
+- `table_parsing_format`: `TSR` (structured tables) or `VLM` (complex tables) (default: `VLM`)
+- `table_output_mode`: MARKDOWN` or `HTML` (default: `MARKDOWN`)
+- `table_summarization`: Enable table content summarization (default: `False`)
+- `table_summarization_prompt`: Custom prompt for table analysis
+
+### Figure/Image Options
+- `figure_summarization`: Enable figure/chart summarization (default: `False`)
+- `figure_summarization_prompt`: Custom prompt for figure analysis
+
+### Layout and Page Options
+- `page_range`: Parse specific pages (e.g. ``"1-3,5"``, or ``"2-4"``)
+- `disable_layout_detection`: If True, disables visual layout analysis (default: `False`)
+- `skew_correction`: Apply skew correction to scanned documents (default: `False`)
+
+### Document Enhancement Options
+- `signature_detection`: Detect signature presence in documents (default: `False`)
+- `remove_strikethrough_lines`: Detect and remove strikethrough text (default: `False`)
+
+### Processing Options
+- `timeout_seconds`: Maximum time to wait for processing completion (default: `300` seconds)
+
+## Example Usage
+
+### Use Tensorlake with a LangGraph Agent
+
+```python
+from langchain_tensorlake import document_markdown_tool
+from langgraph.prebuilt import create_react_agent
+
+async def main():
+    # Create the agent with the Tensorlake tool
+    agent = create_react_agent(
+        model="openai:gpt-4o-mini",
+        tools=[document_markdown_tool],
+        prompt=(
+            """
+            I have a document that needs to be parsed and analyzed.
+            Please parse this document using the available tools and answer questions about it.
+            Pay special attention to signatures, tables, figures, and key document structure.
+            """
+        ),
+        name="document-analysis-agent",
+    )
+    result = await agent.ainvoke({"messages": [{"role": "user", "content": question}]})
+    return result["messages"][-1].content
+
+if __name__ == "__main__":
+    path = "path/to/your/document.pdf"
+    question = f"What contextual information can you extract about the signatures in my document found at {path}?"
+    asyncio.run(main())
+```
+
+## Supported File Types
+- PDF
+- DOCX
+- Raw Text
+- Presentations (PPT, PPTX)
+- Spreadsheets (XLS, XLSX, XLSM, CSV
+- Images (PNG, JPG)
+- URLs to online documents or hosted files.
+
+## Key Features
+
+- Enhanced Layout Understanding: Advanced visual analysis that preserves reading order for complex document structures
+- Intelligent Chunking: Multiple strategies for optimal content chunking
+- Multi-Modal Processing: Handle text, tables, figures, and forms in a single workflow
+- Scalable Processing: Asynchronous parsing with webhook support
+
+
+## References
+- [langchain-tensorlake Python package](https://pypi.org/project/langchain-tensorlake/)
+- Tensorlake GitHub: [tensorlake](https://github.com/tensorlakeai/tensorlake)
+- Tensorlake Docs: [https://docs.tensorlake.ai](https://docs.tensorlake.ai)
+
+---
+
+
