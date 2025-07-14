@@ -77,4 +77,3 @@ You can configure how documents are parsed using DocumentParserOptions, such as:
 - `chunking_strategy`: fragment, page, or section
 - `detect_tables`: enable or disable table extraction
 - `detect_signatures`: flag signature pages 
-- `extract_structured`: define a schema for structured output
