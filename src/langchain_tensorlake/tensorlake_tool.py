@@ -127,7 +127,6 @@ def document_to_markdown_converter(path: str, options: DocumentParserOptions) ->
         ValueError: If API key is not configured
         Exception: If document processing fails
     """
-
     if not TENSORLAKE_API_KEY:
         return "Error: TENSORLAKE_API_KEY environment variable is not set"
 
