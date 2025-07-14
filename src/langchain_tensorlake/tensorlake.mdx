@@ -35,7 +35,9 @@ Use this tool within LangChain and LangGraph workflows to preprocess or enrich d
 
 ## Tensorlake Tool Configuration Options
 
-The tool uses a pydantic model for rich parsing configuration:
+Tensorlake parsing is configurable across a number of different options, and when using the `document_markdown_tool` and a robust model, such as OpenAI, with your LangGraph agent, the agent will configure the Tensorlake tool for you. 
+
+Here are some of the configurations Tensorlake offers so that you can define a strong prompt for your LangGraph agent to enable a more accurate configuration selection:
 
 ### Chunking Options
 - `chunking_strategy`: `NONE`, `PAGE`, or `SECTION_HEADER`
