@@ -1,37 +1,21 @@
-# 1. Import the langchain-tensorlake tool
-from langchain_tensorlake import DocumentParserOptions, document_markdown_tool
+from langchain_tensorlake import document_markdown_tool
 from langgraph.prebuilt import create_react_agent
-import asyncio
-import os
+from dotenv import load_dotenv
 
-# 2. Load the environment variables 
-os.environ["TENSORLAKE_API_KEY"] = "TENSORLAKE_API_KEY_PLACEHOLDER"
-os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY_PLACEHOLDER"
+load_dotenv()
 
-# 3. Define the path to the document to be parsed
-path = "path/to/your/document.pdf"
+# This is using a sample real estate document with signatures
+# You can replace this with any PDF document containing signatures
+path = "https://pub-226479de18b2493f96b64c6674705dd8.r2.dev/real-estate-purchase-all-signed.pdf"
 
-# 4. Define the question to be asked and create the agent
-question = f"What contextual information can you extract about the signatures in my document found at {path}?"
+question = f"How many signatures are found in this whole documents the document found at {path}?"
 
-async def main():
-    # 5. Create the agent with the Tensorlake tool
-    agent = create_react_agent(
-            model="openai:gpt-4o-mini",
-            tools=[document_markdown_tool],
-            prompt=(
-                """
-                I have a document that needs to be parsed. \n\nPlease parse this document and answer the question about it.
-                """
-            ),
-            name="real-estate-agent",
-        )
-    
-    # 6. Run the agent
-    result = await agent.ainvoke({"messages": [{"role": "user", "content": question}]})
+agent = create_react_agent(
+    model="openai:gpt-4o-mini",
+    tools=[document_markdown_tool],
+    prompt="I have a document that needs to be parsed. Please parse it and answer the question.",
+    name="real-estate-agent",
+)
 
-    # 7. Print the result
-    print(result["messages"][-1].content)   
-    
-if __name__ == "__main__":
-    asyncio.run(main())
+result = agent.invoke({"messages": [{"role": "user", "content": question}]})
+print(result["messages"][-1].content)
