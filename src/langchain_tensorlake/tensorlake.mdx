@@ -40,33 +40,27 @@ The tool uses a pydantic model for rich parsing configuration:
 ### Chunking Options
 - `chunking_strategy`: `NONE`, `PAGE`, or `SECTION_HEADER`
 
-### Table Options
-- `table_parsing_strategy`: `TSR` or `VLM`
-- `table_output_mode`: `JSON`, `MARKDOWN`, or `HTML`
-- `table_summary`: Whether to summarize tables
+### Table Processing Options
+- `table_parsing_format`: `TSR` (structured tables) or `VLM` (complex tables) (default: `VLM`)
+- `table_output_mode`: MARKDOWN` or `HTML` (default: `MARKDOWN`)
+- `table_summarization`: Enable table content summarization (default: `False`)
+- `table_summarization_prompt`: Custom prompt for table analysis
 
-### Figure Options
-- `figure_summary`: Enable summarization
-- `figure_summarization_prompt`: Optional custom prompt
+### Figure/Image Options
+- `figure_summarization`: Enable figure/chart summarization (default: `False`)
+- `figure_summarization_prompt`: Custom prompt for figure analysis
 
 ### Layout and Page Options
-- `page_range`: Parse specific pages (e.g. `1-3,5`)
-- `skew_correction`: Apply to scanned documents
-- `disable_layout_detection`: If True, disables visual layout analysis
+- `page_range`: Parse specific pages (e.g. ``"1-3,5"``, or ``"2-4"``)
+- `disable_layout_detection`: If True, disables visual layout analysis (default: `False`)
+- `skew_correction`: Apply skew correction to scanned documents (default: `False`)
 
-### Signature and Form Options
-- `detect_signature`: Detect signature presence
-- `form_detection_mode`: `OBJECT_DETECTION` or `VLM`
+### Document Enhancement Options
+- `signature_detection`: Detect signature presence in documents (default: `False`)
+- `remove_strikethrough_lines`: Detect and remove strikethrough text (default: `False`)
 
-### Extraction Options
-- `extraction_schema`: JSON schema or pydantic model
-- `extraction_prompt`: Optional custom prompt
-- `extraction_model_provider`: `TENSORLAKE`, `GPT4OMINI`, `SONNET`
-- `skip_ocr`: If True, skips OCR for PDFs
-
-### Timeout / Webhook
-- `timeout_seconds`: Max polling duration
-- `deliver_webhook`: Whether to send results via webhook
+### Processing Options
+- `timeout_seconds`: Maximum time to wait for processing completion (default: `300` seconds)
 
 ## Example Usage
 
@@ -85,24 +79,21 @@ response = document_markdown_tool.invoke({
 })
 ```
 
-### 2. Parsing with Structured Output
+### 2. Processing Scanned Documents
 
-```python
+python
+```
 from langchain_tensorlake import document_markdown_tool, DocumentParserOptions
 
 options = DocumentParserOptions(
-    extraction_schema={
-        "type": "object",
-        "properties": {
-            "name": {"type": "string"},
-            "date": {"type": "string"}
-        },
-        "required": ["name", "date"]
-    }
+    skew_detection=True,  # Correct skewed scanned pages
+    signature_detection=True,  # Detect signatures
+    remove_strikethrough_lines=True,  # Remove crossed-out text
+    disable_layout_detection=False  # Keep layout analysis enabled
 )
 
 response = document_markdown_tool.invoke({
-    "path": "path/to/your/document.pdf",
+    "path": "path/to/scanned_contract.pdf",
     "options": options
 })
 ```
@@ -113,9 +104,12 @@ response = document_markdown_tool.invoke({
 - Images (PNG, JPG, TIFF, etc.)
 - URLs to online documents or hosted files.
 
-## Notes
-- Asynchronous parsing and webhook delivery are supported.
-- Output includes markdown, structured fields, html, etc.
+## Key Features
+
+- Enhanced Layout Understanding: Advanced visual analysis for complex document structures
+- Intelligent Chunking: Multiple strategies for optimal content chunking
+- Multi-Modal Processing: Handle text, tables, figures, and forms in a single workflow
+- Scalable Processing: Asynchronous parsing with webhook support
 
 
 ## References
