@@ -70,7 +70,7 @@ The tool uses a pydantic model for rich parsing configuration:
 from langchain_tensorlake import document_markdown_tool, DocumentParserOptions
 
 options = DocumentParserOptions(
-    detect_signature=True
+    signature_detection=True,  # Detect signatures
 )
 
 response = document_markdown_tool.invoke({
@@ -81,15 +81,14 @@ response = document_markdown_tool.invoke({
 
 ### 2. Processing Scanned Documents
 
-python
-```
+```python
 from langchain_tensorlake import document_markdown_tool, DocumentParserOptions
 
 options = DocumentParserOptions(
     skew_detection=True,  # Correct skewed scanned pages
     signature_detection=True,  # Detect signatures
     remove_strikethrough_lines=True,  # Remove crossed-out text
-    disable_layout_detection=False  # Keep layout analysis enabled
+    page_range="1-10"
 )
 
 response = document_markdown_tool.invoke({
