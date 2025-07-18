@@ -5,18 +5,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
-from tensorlake.documentai import DocumentAI
-from tensorlake.documentai.models import (
-    EnrichmentOptions, 
-    ParsingOptions,
-    ParseStatus
-)
-from tensorlake.documentai.models.enums import (
-    ChunkingStrategy,
-    ParseStatus,
-    TableOutputMode,
-    TableParsingFormat,
-)
+from tensorlake.documentai import DocumentAI, EnrichmentOptions, ParsingOptions, ParseStatus, ChunkingStrategy, TableOutputMode, TableParsingFormat
 
 load_dotenv()
 
